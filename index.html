@@ -651,22 +651,6 @@
             </div>
         </div>
 
-        <h2 class="chart-title" style="margin-bottom: 15px;">✅ Check-in pe sesiuni</h2>
-        <div class="stats-grid" id="checkin-cards-container">
-            <div class="stat-card checkin-card">
-                <div class="stat-number" id="checkin-vineri">0</div>
-                <div class="stat-label">Antrenament Vineri seara</div>
-            </div>
-            <div class="stat-card checkin-card">
-                <div class="stat-number" id="checkin-sambata-dim">0</div>
-                <div class="stat-label">Antrenament sâmbătă dimineața</div>
-            </div>
-            <div class="stat-card checkin-card">
-                <div class="stat-number" id="checkin-sambata-seara">0</div>
-                <div class="stat-label">Antrenament sâmbătă seara</div>
-            </div>
-        </div>
-
         <div class="charts-grid">
             <div class="chart-card">
                 <h2 class="chart-title">👥 Distribuție Participanți: Copil vs Adult</h2>
@@ -769,12 +753,7 @@
                 'Aikido Mangalia': 1
             },
             organizatii: { 'Asociatia Dumkan': 20, 'FRAA': 17 },
-            participare: { 'Toate antrenamentele': 30, 'Sesiuni specifice': 7 },
-            checkinSessions: {
-                'Antrenament Vineri seara': 0,
-                'Antrenament sambata dimineata': 0,
-                'Antrenament sambata seara': 0
-            }
+            participare: { 'Toate antrenamentele': 30, 'Sesiuni specifice': 7 }
         };
 
         // Încearcă să încarci date din localStorage
@@ -782,9 +761,7 @@
             const saved = localStorage.getItem('dashboardData');
             if (saved) {
                 try {
-                    const data = JSON.parse(saved);
-                    if (!data.checkinSessions) data.checkinSessions = { ...defaultData.checkinSessions };
-                    return data;
+                    return JSON.parse(saved);
                 } catch (e) {
                     console.error('Eroare la parsarea datelor salvate:', e);
                     return defaultData;
@@ -1142,10 +1119,6 @@
             document.getElementById('totalCopii').textContent = stats.copilAdult['Copil'] || 0;
             document.getElementById('totalYudansha').textContent = stats.grade['Yudansha (grad Dan)'] || 0;
             document.getElementById('totalMudansha').textContent = stats.grade['Mudansha (grad Kyu)'] || 0;
-            const checkin = stats.checkinSessions || defaultData.checkinSessions;
-            document.getElementById('checkin-vineri').textContent = checkin['Antrenament Vineri seara'] || 0;
-            document.getElementById('checkin-sambata-dim').textContent = checkin['Antrenament sambata dimineata'] || 0;
-            document.getElementById('checkin-sambata-seara').textContent = checkin['Antrenament sambata seara'] || 0;
         }
 
         // Actualizează afișajul ultimei sincronizări
@@ -1188,10 +1161,6 @@
                 animateValue('totalCopii', 0, stats.copilAdult['Copil'] || 0, 1000);
                 animateValue('totalYudansha', 0, stats.grade['Yudansha (grad Dan)'] || 0, 1000);
                 animateValue('totalMudansha', 0, stats.grade['Mudansha (grad Kyu)'] || 0, 1000);
-                const checkin = stats.checkinSessions || defaultData.checkinSessions;
-                document.getElementById('checkin-vineri').textContent = checkin['Antrenament Vineri seara'] || 0;
-                document.getElementById('checkin-sambata-dim').textContent = checkin['Antrenament sambata dimineata'] || 0;
-                document.getElementById('checkin-sambata-seara').textContent = checkin['Antrenament sambata seara'] || 0;
 
                 // Încarcă participanții salvați
                 loadSavedParticipants();
@@ -1312,53 +1281,10 @@
                     grade: {},
                     dojos: {},
                     organizatii: {},
-                    participare: {},
-                    checkinSessions: {
-                        'Antrenament Vineri seara': 0,
-                        'Antrenament sambata dimineata': 0,
-                        'Antrenament sambata seara': 0
-                    }
+                    participare: {}
                 };
 
                 console.log(`✅ Descărcat: ${rows.length} participanți`);
-
-                // Descarcă sheet-ul de check-in (Event Registration Responses - gid 1681679287)
-                const CHECKIN_SHEET_GID = '1681679287';
-                try {
-                    const checkinGvizUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&gid=${CHECKIN_SHEET_GID}&_=${timestamp}`;
-                    const checkinRes = await fetch(checkinGvizUrl, { mode: 'cors', credentials: 'omit' });
-                    if (checkinRes.ok) {
-                        const checkinCsv = await checkinRes.text();
-                        if (checkinCsv && checkinCsv.length > 50) {
-                            const checkinLines = checkinCsv.trim().split('\n');
-                            const checkinHeaders = parseCSVLine(checkinLines[0]);
-                            const checkinRows = checkinLines.slice(1).map(l => parseCSVLine(l));
-                            const checkinColIndex = checkinHeaders.findIndex(h => (h || '').toLowerCase().includes('check'));
-                            const dateTimeColIndex = checkinHeaders.findIndex(h => (h || '').toLowerCase().includes('date') || (h || '').toLowerCase().includes('ora'));
-                            if (checkinColIndex >= 0 && dateTimeColIndex >= 0) {
-                                checkinRows.forEach(row => {
-                                    const checkinVal = (row[checkinColIndex] || '').trim();
-                                    const dateTimeStr = (row[dateTimeColIndex] || '').trim();
-                                    if (!checkinVal || !dateTimeStr) return;
-                                    // Parse "2026-02-13 11:44:53" sau "13/02/2026 11:44:53"
-                                    let day = null, hour = null;
-                                    const matchIso = dateTimeStr.match(/(\d{4})-(\d{2})-(\d{2})\s+(\d{1,2})/);
-                                    const matchRo = dateTimeStr.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})\s+(\d{1,2})/);
-                                    if (matchIso) { day = parseInt(matchIso[3], 10); hour = parseInt(matchIso[4], 10); }
-                                    else if (matchRo) { day = parseInt(matchRo[1], 10); hour = parseInt(matchRo[4], 10); }
-                                    if (day === null || hour === null) return;
-                                    let sessionName = null;
-                                    if (day === 13) sessionName = 'Antrenament Vineri seara';
-                                    else if (day === 14) sessionName = hour < 13 ? 'Antrenament sambata dimineata' : 'Antrenament sambata seara';
-                                    if (sessionName && stats.checkinSessions[sessionName] !== undefined) stats.checkinSessions[sessionName]++;
-                                });
-                                console.log('✅ Check-in sesiuni:', stats.checkinSessions);
-                            }
-                        }
-                    }
-                } catch (e) {
-                    console.warn('⚠️ Nu s-au putut încărca datele de check-in:', e);
-                }
 
                 // Resetează array-ul de participanți
                 allParticipants = [];
@@ -1404,10 +1330,6 @@
                 animateValue('totalCopii', 0, stats.copilAdult['Copil'] || 0, 800);
                 animateValue('totalYudansha', 0, stats.grade['Yudansha (grad Dan)'] || 0, 800);
                 animateValue('totalMudansha', 0, stats.grade['Mudansha (grad Kyu)'] || 0, 800);
-                // Actualizează cardurile check-in (numere directe)
-                document.getElementById('checkin-vineri').textContent = stats.checkinSessions['Antrenament Vineri seara'] || 0;
-                document.getElementById('checkin-sambata-dim').textContent = stats.checkinSessions['Antrenament sambata dimineata'] || 0;
-                document.getElementById('checkin-sambata-seara').textContent = stats.checkinSessions['Antrenament sambata seara'] || 0;
 
                 // Actualizează grafice și salvează datele
                 updateChartsWithNewData(stats);
