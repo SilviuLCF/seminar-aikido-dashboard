@@ -616,7 +616,7 @@
                 📊 Dashboard
             </div>
             <div class="tab" onclick="switchTab('participants')">
-                👥 Lista Participanți
+                👥 Lista Înscriși
             </div>
         </div>
 
@@ -720,12 +720,12 @@
         </div>
         <!-- End Dashboard Tab -->
 
-        <!-- Tab Content: Lista Participanți -->
+        <!-- Tab Content: Lista Înscriși -->
         <div id="participants-tab" class="tab-content">
             <div class="participants-table-container">
-                <h2 style="color: #ffffff; margin-bottom: 15px; text-align: center;">📋 Lista Completă Participanți</h2>
+                <h2 style="color: #ffffff; margin-bottom: 15px; text-align: center;">📋 Lista Completă Înscriși</h2>
                 <input type="text" id="searchInput" class="table-search" placeholder="🔍 Caută participant (nume, dojo, organizație...)">
-                <div class="table-info" id="tableInfo">Se încarcă participanții...</div>
+                <div class="table-info" id="tableInfo">Se încarcă înscrișii...</div>
                 <table class="participants-table" id="participantsTable">
                     <thead>
                         <tr>
@@ -740,7 +740,7 @@
                     <tbody id="participantsTableBody">
                         <tr>
                             <td colspan="6" style="text-align: center; padding: 40px; color: #9ca3af;">
-                                Apasă butonul "Sync" pentru a încărca participanții
+                                Apasă butonul "Sync" pentru a încărca înscrișii
                             </td>
                         </tr>
                     </tbody>
@@ -1096,7 +1096,7 @@
             const tableInfo = document.getElementById('tableInfo');
             
             if (!participants || participants.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 40px; color: #9ca3af;">Nu există participanți</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 40px; color: #9ca3af;">Nu există înscriși</td></tr>';
                 tableInfo.textContent = 'Nu există date disponibile';
                 return;
             }
@@ -1115,7 +1115,7 @@
                 tbody.appendChild(row);
             });
 
-            tableInfo.textContent = `Total: ${participants.length} participanți`;
+            tableInfo.textContent = `Total: ${participants.length} înscriși`;
         }
 
         // Funcție pentru căutare în tabel
@@ -1343,7 +1343,7 @@
                             if (partCsv && partCsv.length > 5) {
                                 const partLines = partCsv.trim().split('\n');
                                 let count = 0;
-                                partLines.slice(1).forEach(line => {
+                                partLines.forEach(line => {
                                     const cells = parseCSVLine(line);
                                     const nume = (cells[0] || '').trim();
                                     if (nume) {
