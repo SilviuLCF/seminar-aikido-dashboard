@@ -880,14 +880,21 @@
                     }
                     if (chart.config.type === 'bar') {
                         var meta = chart.getDatasetMeta(0);
+                        var isHorizontal = chart.options.indexAxis === 'y';
                         meta.data.forEach(function(bar, i) {
                             var val = data[i];
                             ctx.save();
                             ctx.fillStyle = '#fff';
                             ctx.font = 'bold 14px sans-serif';
-                            ctx.textAlign = 'center';
-                            ctx.textBaseline = 'bottom';
-                            ctx.fillText(val, bar.x, bar.y - 4);
+                            if (isHorizontal) {
+                                ctx.textAlign = 'left';
+                                ctx.textBaseline = 'middle';
+                                ctx.fillText(val, (bar.x > bar.base ? bar.x : bar.base) + 6, bar.y);
+                            } else {
+                                ctx.textAlign = 'center';
+                                ctx.textBaseline = 'bottom';
+                                ctx.fillText(val, bar.x, bar.y - 4);
+                            }
                             ctx.restore();
                         });
                         var opts = chart.options.plugins;
