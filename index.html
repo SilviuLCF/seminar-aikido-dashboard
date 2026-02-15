@@ -1444,10 +1444,9 @@
                         console.warn('⚠️ Sheet', gid, ':', e.message);
                     }
                 }
-                auParticipat = uniqueNames.size;
-                console.log('✅ Au participat (unici):', auParticipat, '| Antrenament 1/2/3:', perSheetCounts);
+                console.log('✅ Unici din 3 sheet-uri:', uniqueNames.size, '| Antrenament 1/2/3:', perSheetCounts);
 
-                // Lista Participanți: unici din 3 sheet-uri, cu date din 87508598. Potrivire cu normalizare.
+                // Lista Participanți: unici din 3 sheet-uri, potriviți cu 87508598 (aceeași logică ca în tab). Cardul „Participanți” = acest număr.
                 listParticipanti = [];
                 const uniqueNamesSorted = Array.from(uniqueNames).sort();
                 for (const nume of uniqueNamesSorted) {
@@ -1464,7 +1463,8 @@
                         });
                     }
                 }
-                console.log('✅ Lista Participanți (unici cu date din înscriși):', listParticipanti.length);
+                auParticipat = listParticipanti.length;
+                console.log('✅ Participanți (unici cu date din înscriși, folosit în card și tab):', auParticipat);
 
                 // Calculează statistici
                 const stats = {
