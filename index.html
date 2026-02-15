@@ -272,11 +272,29 @@
         }
 
         .tab-content {
-            display: none;
+            display: none !important;
         }
 
         .tab-content.active {
-            display: block;
+            display: block !important;
+        }
+
+        #dashboard-tab.active {
+            display: flex !important;
+        }
+
+        /* Tab-urile de listă: conținut full width, doar tabel (listă), fără carduri dashboard */
+        #participants-tab.active,
+        #listaparticipanti-tab.active {
+            display: block !important;
+            width: 100%;
+            padding: 20px;
+        }
+
+        #participants-tab .participants-table-container,
+        #listaparticipanti-tab .participants-table-container {
+            display: block !important;
+            visibility: visible !important;
         }
 
         /* Tabel participanți (doar în tab-urile Lista Înscriși / Lista Participanți, fără stil de card dashboard) */
@@ -648,15 +666,9 @@
 
         <!-- Tabs Navigation -->
         <div class="tabs">
-            <div class="tab active" onclick="switchTab('dashboard')">
-                📊 Dashboard
-            </div>
-            <div class="tab" onclick="switchTab('participants')">
-                👥 Lista Înscriși
-            </div>
-            <div class="tab" onclick="switchTab('listaparticipanti')">
-                ✅ Lista Participanți
-            </div>
+            <div class="tab active" data-tab="dashboard" onclick="switchTab('dashboard')">📊 Dashboard</div>
+            <div class="tab" data-tab="participants" onclick="switchTab('participants')">👥 Lista Înscriși</div>
+            <div class="tab" data-tab="listaparticipanti" onclick="switchTab('listaparticipanti')">✅ Lista Participanți</div>
         </div>
 
         <!-- Tab Content: Dashboard -->
@@ -914,27 +926,18 @@
             }
         }
 
-        // Funcție pentru schimbarea între tabs
+        // Funcție pentru schimbarea între tabs (carduri doar pe Dashboard, listele pe tab-urile respective)
         function switchTab(tabName) {
-            // Ascunde toate tab-urile
-            document.querySelectorAll('.tab-content').forEach(tab => {
+            document.querySelectorAll('.tab-content').forEach(function(tab) {
                 tab.classList.remove('active');
             });
-            document.querySelectorAll('.tab').forEach(tab => {
+            document.querySelectorAll('.tab').forEach(function(tab) {
                 tab.classList.remove('active');
+                if (tab.getAttribute('data-tab') === tabName) tab.classList.add('active');
             });
-
-            // Afișează tab-ul selectat
-            if (tabName === 'dashboard') {
-                document.getElementById('dashboard-tab').classList.add('active');
-                document.querySelectorAll('.tab')[0].classList.add('active');
-            } else if (tabName === 'participants') {
-                document.getElementById('participants-tab').classList.add('active');
-                document.querySelectorAll('.tab')[1].classList.add('active');
-            } else if (tabName === 'listaparticipanti') {
-                document.getElementById('listaparticipanti-tab').classList.add('active');
-                document.querySelectorAll('.tab')[2].classList.add('active');
-            }
+            var contentId = tabName === 'dashboard' ? 'dashboard-tab' : (tabName === 'participants' ? 'participants-tab' : 'listaparticipanti-tab');
+            var el = document.getElementById(contentId);
+            if (el) el.classList.add('active');
         }
 
         // Funcție pentru popularea tabelului de participanți
