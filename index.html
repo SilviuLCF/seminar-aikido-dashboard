@@ -641,6 +641,22 @@
                 </div>
             </div>
         </div>
+        <div class="stats-grid" style="max-width: 500px;">
+            <div class="stat-card" style="border-color: #6366f1;">
+                <div class="stat-label" style="margin-bottom: 12px; font-weight: 600; color: #9ca3af;">FRAA vs Alte organizații</div>
+                <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 15px;">
+                    <div>
+                        <div class="stat-number" id="fraaCount" style="color: #6366f1; -webkit-text-fill-color: #6366f1;">0</div>
+                        <div class="stat-label">FRAA</div>
+                    </div>
+                    <div style="width: 2px; height: 50px; background: #374151;"></div>
+                    <div>
+                        <div class="stat-number" id="alteOrganizatiiCount" style="color: #6366f1; -webkit-text-fill-color: #6366f1;">0</div>
+                        <div class="stat-label">Alte organizații</div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-number" id="antrenament1">0</div>
@@ -819,6 +835,8 @@
             participare: { 'Toate antrenamentele': 30, 'Sesiuni specifice': 7 },
             inscrisi: 0,
             auParticipat: 0,
+            fraa: 0,
+            alteOrganizatii: 0,
             antrenament1: 0,
             antrenament2: 0,
             antrenament3: 0
@@ -832,6 +850,8 @@
                     const data = JSON.parse(saved);
                     if (data.inscrisi === undefined) data.inscrisi = 0;
                     if (data.auParticipat === undefined) data.auParticipat = 0;
+                    if (data.fraa === undefined) data.fraa = 0;
+                    if (data.alteOrganizatii === undefined) data.alteOrganizatii = 0;
                     if (data.antrenament1 === undefined) data.antrenament1 = 0;
                     if (data.antrenament2 === undefined) data.antrenament2 = 0;
                     if (data.antrenament3 === undefined) data.antrenament3 = 0;
@@ -1237,6 +1257,8 @@
             document.getElementById('totalMudansha').textContent = stats.grade['Mudansha (grad Kyu)'] || 0;
             document.getElementById('inscrisi').textContent = stats.inscrisi ?? 0;
             document.getElementById('auParticipat').textContent = stats.auParticipat ?? 0;
+            document.getElementById('fraaCount').textContent = stats.fraa ?? 0;
+            document.getElementById('alteOrganizatiiCount').textContent = stats.alteOrganizatii ?? 0;
             document.getElementById('antrenament1').textContent = stats.antrenament1 ?? 0;
             document.getElementById('antrenament2').textContent = stats.antrenament2 ?? 0;
             document.getElementById('antrenament3').textContent = stats.antrenament3 ?? 0;
@@ -1295,7 +1317,13 @@
                     try {
                         listParticipanti = JSON.parse(savedListPart);
                         populateListaParticipantiTable(listParticipanti);
+                        const fraa = listParticipanti.filter(p => (String(p.organizatie || '').toUpperCase().includes('FRAA'))).length;
+                        document.getElementById('fraaCount').textContent = stats.fraa ?? fraa;
+                        document.getElementById('alteOrganizatiiCount').textContent = stats.alteOrganizatii ?? (listParticipanti.length - fraa);
                     } catch (e) { }
+                } else {
+                    document.getElementById('fraaCount').textContent = stats.fraa ?? 0;
+                    document.getElementById('alteOrganizatiiCount').textContent = stats.alteOrganizatii ?? 0;
                 }
 
                 const date = new Date(lastUpdate);
@@ -1482,11 +1510,17 @@
                 auParticipat = uniqueNames.size;
                 console.log('✅ Participanți (toți din 1372261625 col A):', auParticipat, '| cu date din 87508598:', listParticipanti.filter(p => p.dojo || p.organizatie || p.categorie || p.grad).length);
 
+                // FRAA vs Alte organizații (din listParticipanti)
+                const fraaCount = listParticipanti.filter(p => (String(p.organizatie || '').toUpperCase().includes('FRAA'))).length;
+                const alteOrganizatiiCount = listParticipanti.length - fraaCount;
+
                 // Calculează statistici
                 const stats = {
                     total: inscrisi,
                     inscrisi,
                     auParticipat,
+                    fraa: fraaCount,
+                    alteOrganizatii: alteOrganizatiiCount,
                     antrenament1: perSheetCounts[0],
                     antrenament2: perSheetCounts[1],
                     antrenament3: perSheetCounts[2],
@@ -1538,9 +1572,11 @@
                 populateListaParticipantiTable(listParticipanti);
                 console.log(`📋 Tabel populat cu ${allParticipants.length} înscriși, ${listParticipanti.length} participanți unici`);
 
-                // Actualizează cardurile Înscriși / Participanți și antrenament 1/2/3
+                // Actualizează cardurile Înscriși / Participanți, FRAA vs Alte, antrenament 1/2/3
                 document.getElementById('inscrisi').textContent = stats.inscrisi;
                 document.getElementById('auParticipat').textContent = stats.auParticipat;
+                document.getElementById('fraaCount').textContent = stats.fraa;
+                document.getElementById('alteOrganizatiiCount').textContent = stats.alteOrganizatii;
                 document.getElementById('antrenament1').textContent = stats.antrenament1;
                 document.getElementById('antrenament2').textContent = stats.antrenament2;
                 document.getElementById('antrenament3').textContent = stats.antrenament3;
