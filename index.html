@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Seminar Iulian Perpelici 6 Dan, București - Mirai Dojo</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -708,71 +707,6 @@
                 <div class="stat-label">Participanți antrenament 3</div>
             </div>
         </div>
-        <div class="stats-grid single-card">
-            <div class="stat-card total-card">
-                <div class="stat-number" id="totalParticipanti">37</div>
-                <div class="stat-label">Total Participanți</div>
-            </div>
-        </div>
-
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-number" id="totalAdulti">32</div>
-                <div class="stat-label">Adulți</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="totalCopii">5</div>
-                <div class="stat-label">Copii</div>
-            </div>
-        </div>
-
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-number" id="totalYudansha">15</div>
-                <div class="stat-label">Yudansha (Dan)</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="totalMudansha">22</div>
-                <div class="stat-label">Mudansha (Kyu)</div>
-            </div>
-        </div>
-
-        <div class="charts-grid">
-            <div class="chart-card">
-                <h2 class="chart-title">👥 Distribuție Participanți: Copil vs Adult</h2>
-                <div class="chart-container">
-                    <canvas id="copilAdultChart"></canvas>
-                </div>
-            </div>
-
-            <div class="chart-card">
-                <h2 class="chart-title">🥋 Distribuție Grade: Yudansha vs Mudansha</h2>
-                <div class="chart-container">
-                    <canvas id="gradeChart"></canvas>
-                </div>
-            </div>
-
-            <div class="chart-card full-width">
-                <h2 class="chart-title">📊 Participanți pe Dojo-uri</h2>
-                <div class="chart-container">
-                    <canvas id="dojoChart"></canvas>
-                </div>
-            </div>
-
-            <div class="chart-card full-width">
-                <h2 class="chart-title">🏛️ Participanți pe Organizații</h2>
-                <div class="chart-container">
-                    <canvas id="organizatieChart"></canvas>
-                </div>
-            </div>
-
-            <div class="chart-card">
-                <h2 class="chart-title">📅 Tip Participare</h2>
-                <div class="chart-container">
-                    <canvas id="participareChart"></canvas>
-                </div>
-            </div>
-        </div>
         </div>
         <!-- End Dashboard Tab -->
 
@@ -852,7 +786,6 @@
         };
 
         // Variabile globale pentru grafice și date
-        let copilAdultChart, gradeChart, dojoChart, organizatieChart, participareChart;
         let allParticipants = [];
         let listParticipanti = [];
 
@@ -930,243 +863,6 @@
                 }
             }
         }
-
-        // Încarcă datele salvate sau default
-        const savedStats = loadSavedData();
-
-        // Date pentru grafice (din localStorage sau default)
-        const copilAdultData = {
-            labels: Object.keys(savedStats.copilAdult),
-            datasets: [{
-                data: Object.values(savedStats.copilAdult),
-                backgroundColor: colors.copilAdult,
-                borderWidth: 0,
-                hoverOffset: 15
-            }]
-        };
-
-        const dojoData = {
-            labels: Object.keys(savedStats.dojos),
-            datasets: [{
-                label: 'Număr participanți',
-                data: Object.values(savedStats.dojos),
-                backgroundColor: colors.primary.slice(0, Object.keys(savedStats.dojos).length),
-                borderWidth: 0,
-                borderRadius: 8
-            }]
-        };
-
-        const gradeData = {
-            labels: Object.keys(savedStats.grade),
-            datasets: [{
-                data: Object.values(savedStats.grade),
-                backgroundColor: ['#dc2626', '#4b5563'],
-                borderWidth: 0,
-                hoverOffset: 15
-            }]
-        };
-
-        const organizatieData = {
-            labels: Object.keys(savedStats.organizatii),
-            datasets: [{
-                label: 'Număr participanți',
-                data: Object.values(savedStats.organizatii),
-                backgroundColor: ['#dc2626', '#6b7280'],
-                borderWidth: 0,
-                borderRadius: 8
-            }]
-        };
-
-        const participareData = {
-            labels: Object.keys(savedStats.participare),
-            datasets: [{
-                data: Object.values(savedStats.participare),
-                backgroundColor: ['#dc2626', '#374151'],
-                borderWidth: 0,
-                hoverOffset: 15
-            }]
-        };
-
-        // Configurație comună pentru grafice
-        const commonOptions = {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'bottom',
-                    labels: {
-                        padding: window.innerWidth < 480 ? 5 : (window.innerWidth < 768 ? 8 : 20),
-                        font: {
-                            size: window.innerWidth < 480 ? 9 : (window.innerWidth < 768 ? 10 : 14),
-                            family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
-                        },
-                        boxWidth: window.innerWidth < 480 ? 25 : (window.innerWidth < 768 ? 30 : 40),
-                        usePointStyle: window.innerWidth < 768,
-                        color: '#d1d5db'
-                    }
-                },
-                tooltip: {
-                    backgroundColor: 'rgba(0,0,0,0.8)',
-                    padding: window.innerWidth < 768 ? 8 : 12,
-                    titleFont: {
-                        size: window.innerWidth < 768 ? 12 : 16
-                    },
-                    bodyFont: {
-                        size: window.innerWidth < 768 ? 11 : 14
-                    },
-                    callbacks: {
-                        label: function(context) {
-                            let label = context.label || '';
-                            if (label) {
-                                label += ': ';
-                            }
-                            label += context.parsed || context.parsed.y;
-                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                            const percentage = ((context.parsed / total) * 100).toFixed(1);
-                            label += ` (${percentage}%)`;
-                            return label;
-                        }
-                    }
-                }
-            }
-        };
-
-        // Grafic Copil vs Adult (Pie)
-        copilAdultChart = new Chart(document.getElementById('copilAdultChart'), {
-            type: 'doughnut',
-            data: copilAdultData,
-            options: {
-                ...commonOptions,
-                cutout: '60%'
-            }
-        });
-
-        // Grafic Dojo-uri (Bar)
-        dojoChart = new Chart(document.getElementById('dojoChart'), {
-            type: 'bar',
-            data: dojoData,
-            options: {
-                ...commonOptions,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 2,
-                            font: {
-                                size: window.innerWidth < 480 ? 9 : (window.innerWidth < 768 ? 10 : 12)
-                            },
-                            color: '#d1d5db'
-                        },
-                        grid: {
-                            color: 'rgba(220, 38, 38, 0.1)'
-                        }
-                    },
-                    x: {
-                        ticks: {
-                            font: {
-                                size: window.innerWidth < 480 ? 9 : (window.innerWidth < 768 ? 10 : 12)
-                            },
-                            maxRotation: window.innerWidth < 768 ? 45 : 0,
-                            minRotation: window.innerWidth < 768 ? 45 : 0,
-                            color: '#d1d5db'
-                        },
-                        grid: {
-                            display: false
-                        }
-                    }
-                },
-                plugins: {
-                    ...commonOptions.plugins,
-                    datalabels: {
-                        display: false
-                    }
-                }
-            },
-            plugins: [{
-                id: 'datalabels',
-                afterDatasetsDraw(chart) {
-                    const { ctx, data } = chart;
-                    const fontSize = window.innerWidth < 480 ? 12 : (window.innerWidth < 768 ? 14 : 18);
-                    chart.getDatasetMeta(0).data.forEach((datapoint, index) => {
-                        const value = data.datasets[0].data[index];
-                        const yPos = datapoint.y + ((datapoint.base - datapoint.y) / 2);
-                        ctx.font = `bold ${fontSize}px sans-serif`;
-                        ctx.fillStyle = 'white';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        ctx.fillText(value, datapoint.x, yPos);
-                    });
-                }
-            }]
-        });
-
-        // Grafic Grade (Doughnut - la fel ca Copil/Adult)
-        gradeChart = new Chart(document.getElementById('gradeChart'), {
-            type: 'doughnut',
-            data: gradeData,
-            options: {
-                ...commonOptions,
-                cutout: '60%'
-            }
-        });
-
-        // Grafic Organizații (Bar)
-        organizatieChart = new Chart(document.getElementById('organizatieChart'), {
-            type: 'bar',
-            data: organizatieData,
-            options: {
-                ...commonOptions,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 5,
-                            font: {
-                                size: window.innerWidth < 480 ? 9 : (window.innerWidth < 768 ? 10 : 12)
-                            },
-                            color: '#d1d5db'
-                        },
-                        grid: {
-                            color: 'rgba(220, 38, 38, 0.1)'
-                        }
-                    },
-                    x: {
-                        ticks: {
-                            font: {
-                                size: window.innerWidth < 480 ? 10 : (window.innerWidth < 768 ? 11 : 14)
-                            },
-                            color: '#d1d5db'
-                        },
-                        grid: {
-                            display: false
-                        }
-                    }
-                },
-                plugins: {
-                    ...commonOptions.plugins,
-                    datalabels: {
-                        display: false
-                    }
-                }
-            },
-            plugins: [{
-                id: 'datalabels',
-                afterDatasetsDraw(chart) {
-                    const { ctx, data } = chart;
-                    const fontSize = window.innerWidth < 480 ? 12 : (window.innerWidth < 768 ? 14 : 18);
-                    chart.getDatasetMeta(0).data.forEach((datapoint, index) => {
-                        const value = data.datasets[0].data[index];
-                        const yPos = datapoint.y + ((datapoint.base - datapoint.y) / 2);
-                        ctx.font = `bold ${fontSize}px sans-serif`;
-                        ctx.fillStyle = 'white';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        ctx.fillText(value, datapoint.x, yPos);
-                    });
-                }
-            }]
-        });
 
         // Funcție pentru schimbarea între tabs
         function switchTab(tabName) {
@@ -1295,11 +991,6 @@
 
         // Actualizează cardurile cu datele salvate
         function updateCards(stats) {
-            document.getElementById('totalParticipanti').textContent = stats.total;
-            document.getElementById('totalAdulti').textContent = stats.copilAdult['Adult'] || 0;
-            document.getElementById('totalCopii').textContent = stats.copilAdult['Copil'] || 0;
-            document.getElementById('totalYudansha').textContent = stats.grade['Yudansha (grad Dan)'] || 0;
-            document.getElementById('totalMudansha').textContent = stats.grade['Mudansha (grad Kyu)'] || 0;
             document.getElementById('inscrisi').textContent = stats.inscrisi ?? 0;
             document.getElementById('auParticipat').textContent = stats.auParticipat ?? 0;
             document.getElementById('fraaCount').textContent = stats.fraa ?? 0;
@@ -1336,23 +1027,10 @@
             // Dacă nu există date salvate sau sunt mai vechi de 5 minute, fă sync automat
             if (!lastUpdate) {
                 console.log('🔄 Prima încărcare - se sincronizează automat datele...');
-                // Afișează loading pe toate cardurile
-                document.getElementById('totalParticipanti').textContent = '...';
-                document.getElementById('totalAdulti').textContent = '...';
-                document.getElementById('totalCopii').textContent = '...';
-                document.getElementById('totalYudansha').textContent = '...';
-                document.getElementById('totalMudansha').textContent = '...';
-                
-                // Fă sync automat
                 await syncData();
             } else {
                 // Încarcă datele salvate
                 const stats = loadSavedData();
-                animateValue('totalParticipanti', 0, stats.total, 1000);
-                animateValue('totalAdulti', 0, stats.copilAdult['Adult'] || 0, 1000);
-                animateValue('totalCopii', 0, stats.copilAdult['Copil'] || 0, 1000);
-                animateValue('totalYudansha', 0, stats.grade['Yudansha (grad Dan)'] || 0, 1000);
-                animateValue('totalMudansha', 0, stats.grade['Mudansha (grad Kyu)'] || 0, 1000);
                 document.getElementById('inscrisi').textContent = stats.inscrisi ?? 0;
                 document.getElementById('auParticipat').textContent = stats.auParticipat ?? 0;
                 document.getElementById('antrenament1').textContent = stats.antrenament1 ?? 0;
@@ -1421,16 +1099,6 @@
             result.push(current.trim());
             return result;
         }
-
-        // Grafic Participare (Doughnut)
-        participareChart = new Chart(document.getElementById('participareChart'), {
-            type: 'doughnut',
-            data: participareData,
-            options: {
-                ...commonOptions,
-                cutout: '60%'
-            }
-        });
 
         // Funcție pentru sync date din Google Sheets
         async function syncData() {
@@ -1666,20 +1334,13 @@
                 document.getElementById('antrenament2').textContent = stats.antrenament2;
                 document.getElementById('antrenament3').textContent = stats.antrenament3;
 
-                // Actualizează cardurile cu animație
-                animateValue('totalParticipanti', 0, stats.total, 800);
-                animateValue('totalAdulti', 0, stats.copilAdult['Adult'] || 0, 800);
-                animateValue('totalCopii', 0, stats.copilAdult['Copil'] || 0, 800);
-                animateValue('totalYudansha', 0, stats.grade['Yudansha (grad Dan)'] || 0, 800);
-                animateValue('totalMudansha', 0, stats.grade['Mudansha (grad Kyu)'] || 0, 800);
-
-                // Actualizează grafice și salvează datele
-                updateChartsWithNewData(stats);
+                // Salvează datele
+                saveData(stats);
                 
                 // Actualizează display-ul ultimei sincronizări
                 updateLastSyncDisplay();
 
-                btn.textContent = `✅ Sincronizat! (${stats.total} participanți)`;
+                btn.textContent = `✅ Sincronizat! (${stats.inscrisi} înscriși, ${stats.auParticipat} participanți)`;
                 btn.style.background = 'linear-gradient(135deg, #0f9d58 0%, #16c172 100%)';
                 
                 setTimeout(() => {
@@ -1703,43 +1364,6 @@
             }
         }
 
-        // Funcție pentru actualizare grafice cu date noi
-        function updateChartsWithNewData(stats) {
-            // Actualizează grafic Copil vs Adult
-            copilAdultChart.data.labels = Object.keys(stats.copilAdult);
-            copilAdultChart.data.datasets[0].data = Object.values(stats.copilAdult);
-            copilAdultChart.update('active');
-            
-            // Actualizează grafic Grade
-            gradeChart.data.labels = Object.keys(stats.grade);
-            gradeChart.data.datasets[0].data = Object.values(stats.grade);
-            gradeChart.update('active');
-            
-            // Actualizează grafic Dojo-uri
-            const dojosSorted = Object.entries(stats.dojos).sort((a, b) => b[1] - a[1]);
-            dojoChart.data.labels = dojosSorted.map(d => d[0]);
-            dojoChart.data.datasets[0].data = dojosSorted.map(d => d[1]);
-            dojoChart.data.datasets[0].backgroundColor = colors.primary.slice(0, dojosSorted.length);
-            dojoChart.update('active');
-            
-            // Actualizează grafic Organizații
-            const orgSorted = Object.entries(stats.organizatii).sort((a, b) => b[1] - a[1]);
-            organizatieChart.data.labels = orgSorted.map(o => o[0]);
-            organizatieChart.data.datasets[0].data = orgSorted.map(o => o[1]);
-            organizatieChart.data.datasets[0].backgroundColor = ['#dc2626', '#6b7280', '#4b5563', '#9ca3af'].slice(0, orgSorted.length);
-            organizatieChart.update('active');
-            
-            // Actualizează grafic Participare
-            participareChart.data.labels = Object.keys(stats.participare);
-            participareChart.data.datasets[0].data = Object.values(stats.participare);
-            participareChart.update('active');
-            
-            // Salvează datele în localStorage
-            saveData(stats);
-            
-            console.log('✅ Grafice actualizate cu succes!');
-            console.log('💾 Date salvate pentru refresh-uri viitoare');
-        }
     </script>
 </body>
 </html>
