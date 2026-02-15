@@ -772,7 +772,12 @@
                 <h2 class="chart-title">Participanți pe antrenamente</h2>
                 <div class="chart-container"><canvas id="chartAntrenamente"></canvas></div>
             </div>
+            <div class="chart-card full-width">
+                <h2 class="chart-title">Dojo-uri participante</h2>
+                <div class="chart-container"><canvas id="chartDojoParticipanti"></canvas></div>
+            </div>
         </div>
+
         </div>
         <!-- End Dashboard Tab -->
 
@@ -926,7 +931,7 @@
         // Variabile globale pentru grafice și date
         let allParticipants = [];
         let listParticipanti = [];
-        let chartInscrisiParticipanti, chartFraaAlte, chartCopilAdult, chartMudanshaYudansha, chartAntrenamente;
+        let chartInscrisiParticipanti, chartFraaAlte, chartCopilAdult, chartMudanshaYudansha, chartAntrenamente, chartDojoParticipanti;
 
         // Date default pentru grafice
         const defaultData = {
@@ -952,7 +957,8 @@
             yudanshaLista: 0,
             antrenament1: 0,
             antrenament2: 0,
-            antrenament3: 0
+            antrenament3: 0,
+            dojosParticipanti: {}
         };
 
         // Încearcă să încarci date din localStorage
@@ -972,6 +978,7 @@
                     if (data.antrenament1 === undefined) data.antrenament1 = 0;
                     if (data.antrenament2 === undefined) data.antrenament2 = 0;
                     if (data.antrenament3 === undefined) data.antrenament3 = 0;
+                    if (data.dojosParticipanti === undefined) data.dojosParticipanti = {};
                     return data;
                 } catch (e) {
                     console.error('Eroare la parsarea datelor salvate:', e);
@@ -1217,6 +1224,35 @@
             } else {
                 chartAntrenamente.data.datasets[0].data = [a1, a2, a3];
                 chartAntrenamente.update('active');
+            }
+            // Dojo-uri participante (bar)
+            var dojosPart = s.dojosParticipanti || {};
+            var dojosSorted = Object.keys(dojosPart).map(function(k) { return [k, dojosPart[k]]; }).sort(function(a, b) { return b[1] - a[1]; });
+            var dojoLabels = dojosSorted.length ? dojosSorted.map(function(x) { return x[0]; }) : ['—'];
+            var dojoData = dojosSorted.length ? dojosSorted.map(function(x) { return x[1]; }) : [0];
+            var dojoColors = colors.primary.concat(['#6b7280', '#4b5563', '#9ca3af', '#6366f1', '#8b5cf6']);
+            if (!chartDojoParticipanti) {
+                chartDojoParticipanti = new Chart(document.getElementById('chartDojoParticipanti'), {
+                    type: 'bar',
+                    data: {
+                        labels: dojoLabels,
+                        datasets: [{ label: 'Participanți', data: dojoData, backgroundColor: dojoColors.slice(0, dojoLabels.length), borderWidth: 0, borderRadius: 6 }]
+                    },
+                    options: {
+                        ...chartOptions,
+                        indexAxis: dojoLabels.length > 8 ? 'y' : 'x',
+                        scales: {
+                            y: { beginAtZero: true, ticks: { color: '#d1d5db', stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.06)' } },
+                            x: { ticks: { color: '#d1d5db', maxRotation: 45 }, grid: { display: false } }
+                        }
+                    }
+                });
+            } else {
+                chartDojoParticipanti.data.labels = dojoLabels;
+                chartDojoParticipanti.data.datasets[0].data = dojoData;
+                chartDojoParticipanti.data.datasets[0].backgroundColor = dojoColors.slice(0, dojoLabels.length);
+                chartDojoParticipanti.options.indexAxis = dojoLabels.length > 8 ? 'y' : 'x';
+                chartDojoParticipanti.update('active');
             }
         }
 
@@ -1470,6 +1506,13 @@
                 }).length;
                 const mudanshaLista = listParticipanti.length - yudanshaLista;
 
+                // Dojo-uri participante (din listParticipanti)
+                const dojosParticipanti = {};
+                listParticipanti.forEach(function(p) {
+                    const d = (p.dojo || '').trim() || 'Nespecificat';
+                    dojosParticipanti[d] = (dojosParticipanti[d] || 0) + 1;
+                });
+
                 // Calculează statistici
                 const stats = {
                     total: inscrisi,
@@ -1484,6 +1527,7 @@
                     antrenament1: perSheetCounts[0],
                     antrenament2: perSheetCounts[1],
                     antrenament3: perSheetCounts[2],
+                    dojosParticipanti: dojosParticipanti,
                     copilAdult: {},
                     grade: {},
                     dojos: {},
