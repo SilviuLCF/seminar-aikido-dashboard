@@ -169,6 +169,18 @@
             box-shadow: 0 8px 20px rgba(220, 38, 38, 0.5);
         }
 
+        .stat-card .card-chart {
+            height: 140px;
+            position: relative;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .stat-card .card-chart canvas {
+            max-height: 140px !important;
+            width: 100% !important;
+        }
+
         .stat-number {
             font-size: 3em;
             font-weight: bold;
@@ -468,6 +480,11 @@
                 max-width: 100%;
             }
 
+            .stat-card .card-chart {
+                height: 115px;
+                margin-top: 6px;
+            }
+
             .stat-label {
                 font-size: 0.85rem;
             }
@@ -675,60 +692,64 @@
         <div id="dashboard-tab" class="tab-content active">
         <div class="stats-grid stats-grid-4">
             <div class="stat-card" style="border-color: #0f9d58;">
-                <div class="stat-label" style="margin-bottom: 12px; font-weight: 600; color: #9ca3af;">Înscriși vs Participanți</div>
-                <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 15px;">
+                <div class="stat-label" style="margin-bottom: 8px; font-weight: 600; color: #9ca3af;">Înscriși vs Participanți</div>
+                <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 10px;">
                     <div>
-                        <div class="stat-number" id="inscrisi" style="color: #0f9d58; -webkit-text-fill-color: #0f9d58;">0</div>
+                        <div class="stat-number" id="inscrisi" style="color: #0f9d58; -webkit-text-fill-color: #0f9d58; font-size: 1.8rem;">0</div>
                         <div class="stat-label">Înscriși</div>
                     </div>
-                    <div style="width: 2px; height: 50px; background: #374151;"></div>
+                    <div style="width: 2px; height: 40px; background: #374151;"></div>
                     <div>
-                        <div class="stat-number" id="auParticipat" style="color: #0f9d58; -webkit-text-fill-color: #0f9d58;">0</div>
+                        <div class="stat-number" id="auParticipat" style="color: #0f9d58; -webkit-text-fill-color: #0f9d58; font-size: 1.8rem;">0</div>
                         <div class="stat-label">Participanți</div>
                     </div>
                 </div>
+                <div class="card-chart"><canvas id="chartInscrisiParticipanti"></canvas></div>
             </div>
             <div class="stat-card" style="border-color: #6366f1;">
-                <div class="stat-label" style="margin-bottom: 12px; font-weight: 600; color: #9ca3af;">FRAA vs Alte organizații</div>
-                <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 15px;">
+                <div class="stat-label" style="margin-bottom: 8px; font-weight: 600; color: #9ca3af;">FRAA vs Alte organizații</div>
+                <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 10px;">
                     <div>
-                        <div class="stat-number" id="fraaCount" style="color: #6366f1; -webkit-text-fill-color: #6366f1;">0</div>
+                        <div class="stat-number" id="fraaCount" style="color: #6366f1; -webkit-text-fill-color: #6366f1; font-size: 1.8rem;">0</div>
                         <div class="stat-label">FRAA</div>
                     </div>
-                    <div style="width: 2px; height: 50px; background: #374151;"></div>
+                    <div style="width: 2px; height: 40px; background: #374151;"></div>
                     <div>
-                        <div class="stat-number" id="alteOrganizatiiCount" style="color: #6366f1; -webkit-text-fill-color: #6366f1;">0</div>
+                        <div class="stat-number" id="alteOrganizatiiCount" style="color: #6366f1; -webkit-text-fill-color: #6366f1; font-size: 1.8rem;">0</div>
                         <div class="stat-label">Alte organizații</div>
                     </div>
                 </div>
+                <div class="card-chart"><canvas id="chartFraaAlte"></canvas></div>
             </div>
             <div class="stat-card" style="border-color: #eab308;">
-                <div class="stat-label" style="margin-bottom: 12px; font-weight: 600; color: #9ca3af;">Copil vs Adult</div>
-                <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 15px;">
+                <div class="stat-label" style="margin-bottom: 8px; font-weight: 600; color: #9ca3af;">Copil vs Adult</div>
+                <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 10px;">
                     <div>
-                        <div class="stat-number" id="copilListaCount" style="color: #eab308; -webkit-text-fill-color: #eab308;">0</div>
+                        <div class="stat-number" id="copilListaCount" style="color: #eab308; -webkit-text-fill-color: #eab308; font-size: 1.8rem;">0</div>
                         <div class="stat-label">Copil</div>
                     </div>
-                    <div style="width: 2px; height: 50px; background: #374151;"></div>
+                    <div style="width: 2px; height: 40px; background: #374151;"></div>
                     <div>
-                        <div class="stat-number" id="adultListaCount" style="color: #eab308; -webkit-text-fill-color: #eab308;">0</div>
+                        <div class="stat-number" id="adultListaCount" style="color: #eab308; -webkit-text-fill-color: #eab308; font-size: 1.8rem;">0</div>
                         <div class="stat-label">Adult</div>
                     </div>
                 </div>
+                <div class="card-chart"><canvas id="chartCopilAdult"></canvas></div>
             </div>
             <div class="stat-card" style="border-color: #ec4899;">
-                <div class="stat-label" style="margin-bottom: 12px; font-weight: 600; color: #9ca3af;">Mudansha vs Yudansha</div>
-                <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 15px;">
+                <div class="stat-label" style="margin-bottom: 8px; font-weight: 600; color: #9ca3af;">Mudansha vs Yudansha</div>
+                <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 10px;">
                     <div>
-                        <div class="stat-number" id="mudanshaListaCount" style="color: #ec4899; -webkit-text-fill-color: #ec4899;">0</div>
+                        <div class="stat-number" id="mudanshaListaCount" style="color: #ec4899; -webkit-text-fill-color: #ec4899; font-size: 1.8rem;">0</div>
                         <div class="stat-label">Mudansha</div>
                     </div>
-                    <div style="width: 2px; height: 50px; background: #374151;"></div>
+                    <div style="width: 2px; height: 40px; background: #374151;"></div>
                     <div>
-                        <div class="stat-number" id="yudanshaListaCount" style="color: #ec4899; -webkit-text-fill-color: #ec4899;">0</div>
+                        <div class="stat-number" id="yudanshaListaCount" style="color: #ec4899; -webkit-text-fill-color: #ec4899; font-size: 1.8rem;">0</div>
                         <div class="stat-label">Yudansha</div>
                     </div>
                 </div>
+                <div class="card-chart"><canvas id="chartMudanshaYudansha"></canvas></div>
             </div>
         </div>
         <div class="stats-grid dashboard-antrenament">
@@ -746,23 +767,7 @@
             </div>
         </div>
 
-        <div class="charts-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); max-width: 1200px; margin: 20px auto;">
-            <div class="chart-card">
-                <h2 class="chart-title">Înscriși vs Participanți</h2>
-                <div class="chart-container"><canvas id="chartInscrisiParticipanti"></canvas></div>
-            </div>
-            <div class="chart-card">
-                <h2 class="chart-title">FRAA vs Alte organizații</h2>
-                <div class="chart-container"><canvas id="chartFraaAlte"></canvas></div>
-            </div>
-            <div class="chart-card">
-                <h2 class="chart-title">Copil vs Adult</h2>
-                <div class="chart-container"><canvas id="chartCopilAdult"></canvas></div>
-            </div>
-            <div class="chart-card">
-                <h2 class="chart-title">Mudansha vs Yudansha</h2>
-                <div class="chart-container"><canvas id="chartMudanshaYudansha"></canvas></div>
-            </div>
+        <div class="charts-grid" style="grid-template-columns: 1fr; max-width: 1200px; margin: 20px auto;">
             <div class="chart-card full-width">
                 <h2 class="chart-title">Participanți pe antrenamente</h2>
                 <div class="chart-container"><canvas id="chartAntrenamente"></canvas></div>
@@ -838,6 +843,78 @@
     <script>
         // Setează data ultimei actualizări
         document.getElementById('lastUpdate').textContent = new Date().toLocaleString('ro-RO');
+
+        // Plugin Chart.js: numere pe grafice + trend pe bar
+        if (typeof Chart !== 'undefined') {
+            Chart.register({
+                id: 'customDatalabels',
+                afterDatasetsDraw: function(chart) {
+                    var ctx = chart.ctx;
+                    var data = chart.data.datasets[0].data;
+                    var total = data.reduce(function(a, b) { return a + b; }, 0);
+                    if (chart.config.type === 'doughnut') {
+                        var meta = chart.getDatasetMeta(0);
+                        meta.data.forEach(function(arc, i) {
+                            var midAngle = (arc.startAngle + arc.endAngle) / 2;
+                            var r = (arc.outerRadius + arc.innerRadius) / 2;
+                            var x = arc.x + Math.cos(midAngle) * r;
+                            var y = arc.y + Math.sin(midAngle) * r;
+                            var val = data[i];
+                            var pct = total > 0 ? Math.round(100 * val / total) + '%' : '0%';
+                            ctx.save();
+                            ctx.fillStyle = '#fff';
+                            ctx.font = 'bold 14px sans-serif';
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            ctx.fillText(val, x, y - 6);
+                            ctx.font = '11px sans-serif';
+                            ctx.fillStyle = '#d1d5db';
+                            ctx.fillText(pct, x, y + 8);
+                            ctx.restore();
+                        });
+                    }
+                    if (chart.config.type === 'bar') {
+                        var meta = chart.getDatasetMeta(0);
+                        meta.data.forEach(function(bar, i) {
+                            var val = data[i];
+                            ctx.save();
+                            ctx.fillStyle = '#fff';
+                            ctx.font = 'bold 14px sans-serif';
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'bottom';
+                            ctx.fillText(val, bar.x, bar.y - 4);
+                            ctx.restore();
+                        });
+                        var opts = chart.options.plugins;
+                        if (opts && opts.trendLine && data.length === 3 && meta.data.length === 3) {
+                            var a1 = data[0], a2 = data[1], a3 = data[2];
+                            var n = 3, sumX = 3, sumY = a1 + a2 + a3, sumXY = a2 + 2*a3, sumX2 = 5;
+                            var m = (sumXY - sumX * sumY / n) / (sumX2 - sumX * sumX / n);
+                            var b = sumY / n - m * (sumX / n);
+                            var trendY = [b, m + b, 2*m + b];
+                            var scaleY = chart.scales.y;
+                            var x0 = meta.data[0].x, x1 = meta.data[2].x;
+                            var y0 = scaleY.getPixelForValue(trendY[0]), y1 = scaleY.getPixelForValue(trendY[2]);
+                            ctx.save();
+                            ctx.strokeStyle = 'rgba(34, 197, 94, 0.9)';
+                            ctx.lineWidth = 2;
+                            ctx.setLineDash([4, 4]);
+                            ctx.beginPath();
+                            ctx.moveTo(x0, y0);
+                            ctx.lineTo(x1, y1);
+                            ctx.stroke();
+                            ctx.restore();
+                            ctx.save();
+                            ctx.fillStyle = '#22c55e';
+                            ctx.font = '11px sans-serif';
+                            ctx.textAlign = 'right';
+                            ctx.fillText((m >= 0 ? '↗ ' : '↘ ') + (m >= 0 ? '+' : '') + m.toFixed(1) + ' trend', chart.chartArea.right - 4, chart.chartArea.top + 12);
+                            ctx.restore();
+                        }
+                    }
+                }
+            });
+        }
 
         // Configurație culori
         const colors = {
@@ -1127,6 +1204,10 @@
                     },
                     options: {
                         ...chartOptions,
+                        plugins: {
+                            ...chartOptions.plugins,
+                            trendLine: true
+                        },
                         scales: {
                             y: { beginAtZero: true, ticks: { color: '#d1d5db', stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.06)' } },
                             x: { ticks: { color: '#d1d5db' }, grid: { display: false } }
