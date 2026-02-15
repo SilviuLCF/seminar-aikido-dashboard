@@ -752,7 +752,7 @@
         </div>
         <!-- End Lista Înscriși Tab -->
 
-        <!-- Tab Content: Lista Participanți (unici din antrenamente, cu date din 87508598) -->
+        <!-- Tab Content: Lista Participanți (nume din 1372261625 col A, date din 87508598 col B) -->
         <div id="listaparticipanti-tab" class="tab-content">
             <div class="participants-table-container">
                 <h2 style="color: #ffffff; margin-bottom: 15px; text-align: center;">✅ Lista Participanți (unici)</h2>
@@ -1410,17 +1410,36 @@
                 // Înscriși = număr rânduri cu Nume complet (coloana B) din sheet 87508598
                 const inscrisi = rows.length;
 
-                // Au participat = unici din coloana A din 3 sheet-uri (138549664, 1187751851, 423881536)
-                // Aceste sheet-uri NU au header: citim de la linia 1. Normalizare: fără \\r, trim, colaps spații (pentru unici).
                 function normalizeNume(s) {
                     return (s || '').replace(/\r/g, '').trim().replace(/\s+/g, ' ');
                 }
                 let auParticipat = 0;
-                const SHEET_PARTICIPARE_GIDS = ['138549664', '1187751851', '423881536'];
+                const SHEET_LISTA_PARTICIPANTI_GID = '1372261625'; // participanți unici: coloana A, fără header
                 const uniqueNames = new Set();
+                try {
+                    const listPartUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&gid=${SHEET_LISTA_PARTICIPANTI_GID}&_=${timestamp}`;
+                    const listPartRes = await fetch(listPartUrl, { mode: 'cors', credentials: 'omit' });
+                    if (listPartRes.ok) {
+                        const listPartCsv = await listPartRes.text();
+                        if (listPartCsv && listPartCsv.length > 2) {
+                            const listPartLines = listPartCsv.trim().split('\n');
+                            listPartLines.slice(1).forEach(line => {
+                                const cells = parseCSVLine(line);
+                                const nume = (cells[0] || '').replace(/\r/g, '').trim();
+                                if (nume) uniqueNames.add(nume);
+                            });
+                        }
+                    }
+                } catch (e) {
+                    console.warn('⚠️ Sheet lista participanți (1372261625):', e.message);
+                }
+                console.log('✅ Participanți unici din sheet 1372261625 col A:', uniqueNames.size);
+
+                // Numere pentru cardurile Antrenament 1/2/3 (din sheet-urile de participare)
+                const SHEET_ANTRENAMENT_GIDS = ['138549664', '1187751851', '423881536'];
                 const perSheetCounts = [0, 0, 0];
-                for (let i = 0; i < SHEET_PARTICIPARE_GIDS.length; i++) {
-                    const gid = SHEET_PARTICIPARE_GIDS[i];
+                for (let i = 0; i < SHEET_ANTRENAMENT_GIDS.length; i++) {
+                    const gid = SHEET_ANTRENAMENT_GIDS[i];
                     try {
                         const partUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&gid=${gid}&_=${timestamp}`;
                         const partRes = await fetch(partUrl, { mode: 'cors', credentials: 'omit' });
@@ -1428,25 +1447,20 @@
                             const partCsv = await partRes.text();
                             if (partCsv && partCsv.length > 5) {
                                 const partLines = partCsv.trim().split('\n');
-                                let count = 0;
                                 partLines.forEach(line => {
                                     const cells = parseCSVLine(line);
                                     const nume = [0, 1, 2].map(j => (cells[j] || '').replace(/\r/g, '').trim()).find(s => s.length > 0) || '';
-                                    if (nume) {
-                                        uniqueNames.add(nume);
-                                        count++;
-                                    }
+                                    if (nume) perSheetCounts[i]++;
                                 });
-                                perSheetCounts[i] = count;
                             }
                         }
                     } catch (e) {
-                        console.warn('⚠️ Sheet', gid, ':', e.message);
+                        console.warn('⚠️ Sheet antrenament', gid, ':', e.message);
                     }
                 }
-                console.log('✅ Unici din 3 sheet-uri:', uniqueNames.size, '| Antrenament 1/2/3:', perSheetCounts);
+                console.log('✅ Antrenament 1/2/3:', perSheetCounts);
 
-                // Lista Participanți: unici din 3 sheet-uri, potriviți cu 87508598 (aceeași logică ca în tab). Cardul „Participanți” = acest număr.
+                // Lista Participanți: nume din 1372261625 col A, potriviți cu 87508598 col B (header pe linia 1). Cardul „Participanți” = acest număr.
                 listParticipanti = [];
                 const uniqueNamesSorted = Array.from(uniqueNames).sort();
                 for (const nume of uniqueNamesSorted) {
@@ -1464,7 +1478,7 @@
                     }
                 }
                 auParticipat = listParticipanti.length;
-                console.log('✅ Participanți (unici cu date din înscriși, folosit în card și tab):', auParticipat);
+                console.log('✅ Participanți (din 1372261625, potriviți cu 87508598 col B, card + tab):', auParticipat);
 
                 // Calculează statistici
                 const stats = {
