@@ -110,6 +110,12 @@
             margin-left: auto;
             margin-right: auto;
         }
+        .stats-grid.stats-grid-4 {
+            grid-template-columns: repeat(4, minmax(200px, 1fr));
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
 
         .stat-card.total-card {
             background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
@@ -408,6 +414,11 @@
                 max-width: 100%;
             }
 
+            .stats-grid.stats-grid-4 {
+                grid-template-columns: repeat(2, 1fr);
+                max-width: 100%;
+            }
+
             .stat-card {
                 padding: 15px 8px;
                 width: 100%;
@@ -625,7 +636,7 @@
 
         <!-- Tab Content: Dashboard -->
         <div id="dashboard-tab" class="tab-content active">
-        <div class="stats-grid" style="max-width: 500px;">
+        <div class="stats-grid stats-grid-4">
             <div class="stat-card" style="border-color: #0f9d58;">
                 <div class="stat-label" style="margin-bottom: 12px; font-weight: 600; color: #9ca3af;">Înscriși vs Participanți</div>
                 <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 15px;">
@@ -640,8 +651,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="stats-grid" style="max-width: 500px;">
             <div class="stat-card" style="border-color: #6366f1;">
                 <div class="stat-label" style="margin-bottom: 12px; font-weight: 600; color: #9ca3af;">FRAA vs Alte organizații</div>
                 <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 15px;">
@@ -653,6 +662,34 @@
                     <div>
                         <div class="stat-number" id="alteOrganizatiiCount" style="color: #6366f1; -webkit-text-fill-color: #6366f1;">0</div>
                         <div class="stat-label">Alte organizații</div>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card" style="border-color: #eab308;">
+                <div class="stat-label" style="margin-bottom: 12px; font-weight: 600; color: #9ca3af;">Copil vs Adult</div>
+                <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 15px;">
+                    <div>
+                        <div class="stat-number" id="copilListaCount" style="color: #eab308; -webkit-text-fill-color: #eab308;">0</div>
+                        <div class="stat-label">Copil</div>
+                    </div>
+                    <div style="width: 2px; height: 50px; background: #374151;"></div>
+                    <div>
+                        <div class="stat-number" id="adultListaCount" style="color: #eab308; -webkit-text-fill-color: #eab308;">0</div>
+                        <div class="stat-label">Adult</div>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card" style="border-color: #ec4899;">
+                <div class="stat-label" style="margin-bottom: 12px; font-weight: 600; color: #9ca3af;">Mudansha vs Yudansha</div>
+                <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 15px;">
+                    <div>
+                        <div class="stat-number" id="mudanshaListaCount" style="color: #ec4899; -webkit-text-fill-color: #ec4899;">0</div>
+                        <div class="stat-label">Mudansha</div>
+                    </div>
+                    <div style="width: 2px; height: 50px; background: #374151;"></div>
+                    <div>
+                        <div class="stat-number" id="yudanshaListaCount" style="color: #ec4899; -webkit-text-fill-color: #ec4899;">0</div>
+                        <div class="stat-label">Yudansha</div>
                     </div>
                 </div>
             </div>
@@ -837,6 +874,10 @@
             auParticipat: 0,
             fraa: 0,
             alteOrganizatii: 0,
+            copilLista: 0,
+            adultLista: 0,
+            mudanshaLista: 0,
+            yudanshaLista: 0,
             antrenament1: 0,
             antrenament2: 0,
             antrenament3: 0
@@ -852,6 +893,10 @@
                     if (data.auParticipat === undefined) data.auParticipat = 0;
                     if (data.fraa === undefined) data.fraa = 0;
                     if (data.alteOrganizatii === undefined) data.alteOrganizatii = 0;
+                    if (data.copilLista === undefined) data.copilLista = 0;
+                    if (data.adultLista === undefined) data.adultLista = 0;
+                    if (data.mudanshaLista === undefined) data.mudanshaLista = 0;
+                    if (data.yudanshaLista === undefined) data.yudanshaLista = 0;
                     if (data.antrenament1 === undefined) data.antrenament1 = 0;
                     if (data.antrenament2 === undefined) data.antrenament2 = 0;
                     if (data.antrenament3 === undefined) data.antrenament3 = 0;
@@ -1259,6 +1304,10 @@
             document.getElementById('auParticipat').textContent = stats.auParticipat ?? 0;
             document.getElementById('fraaCount').textContent = stats.fraa ?? 0;
             document.getElementById('alteOrganizatiiCount').textContent = stats.alteOrganizatii ?? 0;
+            document.getElementById('copilListaCount').textContent = stats.copilLista ?? 0;
+            document.getElementById('adultListaCount').textContent = stats.adultLista ?? 0;
+            document.getElementById('mudanshaListaCount').textContent = stats.mudanshaLista ?? 0;
+            document.getElementById('yudanshaListaCount').textContent = stats.yudanshaLista ?? 0;
             document.getElementById('antrenament1').textContent = stats.antrenament1 ?? 0;
             document.getElementById('antrenament2').textContent = stats.antrenament2 ?? 0;
             document.getElementById('antrenament3').textContent = stats.antrenament3 ?? 0;
@@ -1320,10 +1369,21 @@
                         const fraa = listParticipanti.filter(p => (String(p.organizatie || '').toUpperCase().includes('FRAA'))).length;
                         document.getElementById('fraaCount').textContent = stats.fraa ?? fraa;
                         document.getElementById('alteOrganizatiiCount').textContent = stats.alteOrganizatii ?? (listParticipanti.length - fraa);
+                        const copilL = listParticipanti.filter(p => (String(p.categorie || '').toUpperCase().includes('COPIL'))).length;
+                        const adultL = listParticipanti.filter(p => (String(p.categorie || '').toUpperCase().includes('ADULT'))).length;
+                        const yudanshaL = listParticipanti.filter(p => /dan|yudansha/i.test(String(p.grad || ''))).length;
+                        document.getElementById('copilListaCount').textContent = stats.copilLista ?? copilL;
+                        document.getElementById('adultListaCount').textContent = stats.adultLista ?? adultL;
+                        document.getElementById('mudanshaListaCount').textContent = stats.mudanshaLista ?? (listParticipanti.length - yudanshaL);
+                        document.getElementById('yudanshaListaCount').textContent = stats.yudanshaLista ?? yudanshaL;
                     } catch (e) { }
                 } else {
                     document.getElementById('fraaCount').textContent = stats.fraa ?? 0;
                     document.getElementById('alteOrganizatiiCount').textContent = stats.alteOrganizatii ?? 0;
+                    document.getElementById('copilListaCount').textContent = stats.copilLista ?? 0;
+                    document.getElementById('adultListaCount').textContent = stats.adultLista ?? 0;
+                    document.getElementById('mudanshaListaCount').textContent = stats.mudanshaLista ?? 0;
+                    document.getElementById('yudanshaListaCount').textContent = stats.yudanshaLista ?? 0;
                 }
 
                 const date = new Date(lastUpdate);
@@ -1510,9 +1570,13 @@
                 auParticipat = uniqueNames.size;
                 console.log('✅ Participanți (toți din 1372261625 col A):', auParticipat, '| cu date din 87508598:', listParticipanti.filter(p => p.dojo || p.organizatie || p.categorie || p.grad).length);
 
-                // FRAA vs Alte organizații (din listParticipanti)
+                // FRAA vs Alte, Copil vs Adult, Mudansha vs Yudansha (din listParticipanti)
                 const fraaCount = listParticipanti.filter(p => (String(p.organizatie || '').toUpperCase().includes('FRAA'))).length;
                 const alteOrganizatiiCount = listParticipanti.length - fraaCount;
+                const copilLista = listParticipanti.filter(p => (String(p.categorie || '').toUpperCase().includes('COPIL'))).length;
+                const adultLista = listParticipanti.filter(p => (String(p.categorie || '').toUpperCase().includes('ADULT'))).length;
+                const yudanshaLista = listParticipanti.filter(p => /dan|yudansha/i.test(String(p.grad || ''))).length;
+                const mudanshaLista = listParticipanti.length - yudanshaLista;
 
                 // Calculează statistici
                 const stats = {
@@ -1521,6 +1585,10 @@
                     auParticipat,
                     fraa: fraaCount,
                     alteOrganizatii: alteOrganizatiiCount,
+                    copilLista,
+                    adultLista,
+                    mudanshaLista,
+                    yudanshaLista,
                     antrenament1: perSheetCounts[0],
                     antrenament2: perSheetCounts[1],
                     antrenament3: perSheetCounts[2],
@@ -1577,6 +1645,10 @@
                 document.getElementById('auParticipat').textContent = stats.auParticipat;
                 document.getElementById('fraaCount').textContent = stats.fraa;
                 document.getElementById('alteOrganizatiiCount').textContent = stats.alteOrganizatii;
+                document.getElementById('copilListaCount').textContent = stats.copilLista;
+                document.getElementById('adultListaCount').textContent = stats.adultLista;
+                document.getElementById('mudanshaListaCount').textContent = stats.mudanshaLista;
+                document.getElementById('yudanshaListaCount').textContent = stats.yudanshaLista;
                 document.getElementById('antrenament1').textContent = stats.antrenament1;
                 document.getElementById('antrenament2').textContent = stats.antrenament2;
                 document.getElementById('antrenament3').textContent = stats.antrenament3;
