@@ -1410,7 +1410,11 @@
                 // Înscriși = număr rânduri cu Nume complet (coloana B) din sheet 87508598
                 const inscrisi = rows.length;
 
-                // Au participat = unici din coloana A (fără header) din 3 sheet-uri; per-sheet = Participanți antrenament 1/2/3
+                // Au participat = unici din coloana A din 3 sheet-uri (138549664, 1187751851, 423881536)
+                // Aceste sheet-uri NU au header: citim de la linia 1. Normalizare: fără \\r, trim, colaps spații (pentru unici).
+                function normalizeNume(s) {
+                    return (s || '').replace(/\r/g, '').trim().replace(/\s+/g, ' ');
+                }
                 let auParticipat = 0;
                 const SHEET_PARTICIPARE_GIDS = ['138549664', '1187751851', '423881536'];
                 const uniqueNames = new Set();
@@ -1427,7 +1431,7 @@
                                 let count = 0;
                                 partLines.forEach(line => {
                                     const cells = parseCSVLine(line);
-                                    const nume = (cells[0] || '').trim();
+                                    const nume = [0, 1, 2].map(j => (cells[j] || '').replace(/\r/g, '').trim()).find(s => s.length > 0) || '';
                                     if (nume) {
                                         uniqueNames.add(nume);
                                         count++;
@@ -1443,11 +1447,11 @@
                 auParticipat = uniqueNames.size;
                 console.log('✅ Au participat (unici):', auParticipat, '| Antrenament 1/2/3:', perSheetCounts);
 
-                // Lista Participanți: unici din 138549664, 1187751851, 423881536, cu date din 87508598 (col B,D,F,G)
+                // Lista Participanți: unici din 3 sheet-uri, cu date din 87508598. Potrivire cu normalizare.
                 listParticipanti = [];
                 const uniqueNamesSorted = Array.from(uniqueNames).sort();
                 for (const nume of uniqueNamesSorted) {
-                    const row = rows.find(r => (r[numeIndex] || '').trim() === nume);
+                    const row = rows.find(r => normalizeNume(r[numeIndex]) === normalizeNume(nume));
                     if (row) {
                         const fullDojo = (row[dojoIndex] || '').trim();
                         const parts = fullDojo.split('/').map(p => p.trim());
