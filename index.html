@@ -618,6 +618,9 @@
             <div class="tab" onclick="switchTab('participants')">
                 👥 Lista Înscriși
             </div>
+            <div class="tab" onclick="switchTab('listaparticipanti')">
+                ✅ Lista Participanți
+            </div>
         </div>
 
         <!-- Tab Content: Dashboard -->
@@ -747,7 +750,36 @@
                 </table>
             </div>
         </div>
-        <!-- End Participants Tab -->
+        <!-- End Lista Înscriși Tab -->
+
+        <!-- Tab Content: Lista Participanți (unici din antrenamente, cu date din 87508598) -->
+        <div id="listaparticipanti-tab" class="tab-content">
+            <div class="participants-table-container">
+                <h2 style="color: #ffffff; margin-bottom: 15px; text-align: center;">✅ Lista Participanți (unici)</h2>
+                <input type="text" id="searchParticipanti" class="table-search" placeholder="🔍 Caută (nume, dojo, organizație, categorie, grad...)">
+                <div class="table-info" id="tableInfoParticipanti">Se încarcă participanții...</div>
+                <table class="participants-table" id="participantiTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Nume</th>
+                            <th>Dojo</th>
+                            <th>Organizație</th>
+                            <th>Copil / Adult</th>
+                            <th>Grad</th>
+                        </tr>
+                    </thead>
+                    <tbody id="participantiTableBody">
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 40px; color: #9ca3af;">
+                                Apasă "Sync" pentru a încărca lista participanților
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- End Lista Participanți Tab -->
 
         <footer>
             <p>Dashboard generat automat din datele Form Responses 1</p>
@@ -769,6 +801,7 @@
         // Variabile globale pentru grafice și date
         let copilAdultChart, gradeChart, dojoChart, organizatieChart, participareChart;
         let allParticipants = [];
+        let listParticipanti = [];
 
         // Date default pentru grafice
         const defaultData = {
@@ -815,8 +848,8 @@
         function saveData(stats) {
             localStorage.setItem('dashboardData', JSON.stringify(stats));
             localStorage.setItem('lastUpdate', new Date().toISOString());
-            // Salvează și participanții
             localStorage.setItem('participants', JSON.stringify(allParticipants));
+            localStorage.setItem('listParticipanti', JSON.stringify(listParticipanti));
         }
 
         // Încarcă participanții din localStorage
@@ -1087,6 +1120,9 @@
             } else if (tabName === 'participants') {
                 document.getElementById('participants-tab').classList.add('active');
                 document.querySelectorAll('.tab')[1].classList.add('active');
+            } else if (tabName === 'listaparticipanti') {
+                document.getElementById('listaparticipanti-tab').classList.add('active');
+                document.querySelectorAll('.tab')[2].classList.add('active');
             }
         }
 
@@ -1118,6 +1154,31 @@
             tableInfo.textContent = `Total: ${participants.length} înscriși`;
         }
 
+        // Funcție pentru popularea tabelei Lista Participanți
+        function populateListaParticipantiTable(participanti) {
+            const tbody = document.getElementById('participantiTableBody');
+            const tableInfo = document.getElementById('tableInfoParticipanti');
+            if (!participanti || participanti.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 40px; color: #9ca3af;">Nu există participanți sau apasă Sync.</td></tr>';
+                tableInfo.textContent = '0 participanți';
+                return;
+            }
+            tbody.innerHTML = '';
+            participanti.forEach((p, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td><strong>${p.nume}</strong></td>
+                    <td>${p.dojo}</td>
+                    <td>${p.organizatie}</td>
+                    <td>${p.categorie}</td>
+                    <td>${p.grad}</td>
+                `;
+                tbody.appendChild(row);
+            });
+            tableInfo.textContent = `Total: ${participanti.length} participanți unici`;
+        }
+
         // Funcție pentru căutare în tabel
         function setupTableSearch() {
             const searchInput = document.getElementById('searchInput');
@@ -1133,6 +1194,20 @@
                     );
                 });
                 populateParticipantsTable(filtered);
+            });
+            const searchParticipanti = document.getElementById('searchParticipanti');
+            searchParticipanti.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const filtered = listParticipanti.filter(p => {
+                    return (
+                        (p.nume || '').toLowerCase().includes(searchTerm) ||
+                        (p.dojo || '').toLowerCase().includes(searchTerm) ||
+                        (p.organizatie || '').toLowerCase().includes(searchTerm) ||
+                        (p.categorie || '').toLowerCase().includes(searchTerm) ||
+                        (p.grad || '').toLowerCase().includes(searchTerm)
+                    );
+                });
+                populateListaParticipantiTable(filtered);
             });
         }
 
@@ -1215,6 +1290,13 @@
 
                 // Încarcă participanții salvați
                 loadSavedParticipants();
+                const savedListPart = localStorage.getItem('listParticipanti');
+                if (savedListPart) {
+                    try {
+                        listParticipanti = JSON.parse(savedListPart);
+                        populateListaParticipantiTable(listParticipanti);
+                    } catch (e) { }
+                }
 
                 const date = new Date(lastUpdate);
                 console.log(`📊 Date încărcate din ultima sincronizare: ${date.toLocaleString('ro-RO')}`);
@@ -1361,6 +1443,25 @@
                 auParticipat = uniqueNames.size;
                 console.log('✅ Au participat (unici):', auParticipat, '| Antrenament 1/2/3:', perSheetCounts);
 
+                // Lista Participanți: unici din 138549664, 1187751851, 423881536, cu date din 87508598 (col B,D,F,G)
+                listParticipanti = [];
+                const uniqueNamesSorted = Array.from(uniqueNames).sort();
+                for (const nume of uniqueNamesSorted) {
+                    const row = rows.find(r => (r[numeIndex] || '').trim() === nume);
+                    if (row) {
+                        const fullDojo = (row[dojoIndex] || '').trim();
+                        const parts = fullDojo.split('/').map(p => p.trim());
+                        listParticipanti.push({
+                            nume: nume,
+                            dojo: parts[0] || '',
+                            organizatie: parts[1] || '',
+                            categorie: (row[copilAdultIndex] || '').trim(),
+                            grad: (row[gradIndex] || '').trim()
+                        });
+                    }
+                }
+                console.log('✅ Lista Participanți (unici cu date din înscriși):', listParticipanti.length);
+
                 // Calculează statistici
                 const stats = {
                     total: inscrisi,
@@ -1412,9 +1513,10 @@
                     });
                 });
 
-                // Populează tabelul de participanți
+                // Populează tabelele
                 populateParticipantsTable(allParticipants);
-                console.log(`📋 Tabel populat cu ${allParticipants.length} participanți`);
+                populateListaParticipantiTable(listParticipanti);
+                console.log(`📋 Tabel populat cu ${allParticipants.length} înscriși, ${listParticipanti.length} participanți unici`);
 
                 // Actualizează cardurile Înscriși / Participanți și antrenament 1/2/3
                 document.getElementById('inscrisi').textContent = stats.inscrisi;
