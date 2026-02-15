@@ -1460,7 +1460,7 @@
                 }
                 console.log('✅ Antrenament 1/2/3:', perSheetCounts);
 
-                // Lista Participanți: nume din 1372261625 col A, potriviți cu 87508598 col B (header pe linia 1). Cardul „Participanți” = acest număr.
+                // Lista Participanți: toate numele unice din 1372261625 col A; date din 87508598 col B unde există potrivire. Card = nr total unici (93).
                 listParticipanti = [];
                 const uniqueNamesSorted = Array.from(uniqueNames).sort();
                 for (const nume of uniqueNamesSorted) {
@@ -1475,10 +1475,12 @@
                             categorie: (row[copilAdultIndex] || '').trim(),
                             grad: (row[gradIndex] || '').trim()
                         });
+                    } else {
+                        listParticipanti.push({ nume: nume, dojo: '', organizatie: '', categorie: '', grad: '' });
                     }
                 }
-                auParticipat = listParticipanti.length;
-                console.log('✅ Participanți (din 1372261625, potriviți cu 87508598 col B, card + tab):', auParticipat);
+                auParticipat = uniqueNames.size;
+                console.log('✅ Participanți (toți din 1372261625 col A):', auParticipat, '| cu date din 87508598:', listParticipanti.filter(p => p.dojo || p.organizatie || p.categorie || p.grad).length);
 
                 // Calculează statistici
                 const stats = {
