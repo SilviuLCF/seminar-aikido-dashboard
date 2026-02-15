@@ -622,6 +622,21 @@
 
         <!-- Tab Content: Dashboard -->
         <div id="dashboard-tab" class="tab-content active">
+        <div class="stats-grid" style="max-width: 500px;">
+            <div class="stat-card" style="border-color: #0f9d58;">
+                <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 15px;">
+                    <div>
+                        <div class="stat-number" id="inscrisi" style="color: #0f9d58; -webkit-text-fill-color: #0f9d58;">0</div>
+                        <div class="stat-label">Înscriși</div>
+                    </div>
+                    <div style="width: 2px; height: 50px; background: #374151;"></div>
+                    <div>
+                        <div class="stat-number" id="auParticipat" style="color: #0f9d58; -webkit-text-fill-color: #0f9d58;">0</div>
+                        <div class="stat-label">Au participat</div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="stats-grid single-card">
             <div class="stat-card total-card">
                 <div class="stat-number" id="totalParticipanti">37</div>
@@ -753,7 +768,9 @@
                 'Aikido Mangalia': 1
             },
             organizatii: { 'Asociatia Dumkan': 20, 'FRAA': 17 },
-            participare: { 'Toate antrenamentele': 30, 'Sesiuni specifice': 7 }
+            participare: { 'Toate antrenamentele': 30, 'Sesiuni specifice': 7 },
+            inscrisi: 0,
+            auParticipat: 0
         };
 
         // Încearcă să încarci date din localStorage
@@ -761,7 +778,10 @@
             const saved = localStorage.getItem('dashboardData');
             if (saved) {
                 try {
-                    return JSON.parse(saved);
+                    const data = JSON.parse(saved);
+                    if (data.inscrisi === undefined) data.inscrisi = 0;
+                    if (data.auParticipat === undefined) data.auParticipat = 0;
+                    return data;
                 } catch (e) {
                     console.error('Eroare la parsarea datelor salvate:', e);
                     return defaultData;
@@ -1119,6 +1139,8 @@
             document.getElementById('totalCopii').textContent = stats.copilAdult['Copil'] || 0;
             document.getElementById('totalYudansha').textContent = stats.grade['Yudansha (grad Dan)'] || 0;
             document.getElementById('totalMudansha').textContent = stats.grade['Mudansha (grad Kyu)'] || 0;
+            document.getElementById('inscrisi').textContent = stats.inscrisi ?? 0;
+            document.getElementById('auParticipat').textContent = stats.auParticipat ?? 0;
         }
 
         // Actualizează afișajul ultimei sincronizări
@@ -1161,6 +1183,8 @@
                 animateValue('totalCopii', 0, stats.copilAdult['Copil'] || 0, 1000);
                 animateValue('totalYudansha', 0, stats.grade['Yudansha (grad Dan)'] || 0, 1000);
                 animateValue('totalMudansha', 0, stats.grade['Mudansha (grad Kyu)'] || 0, 1000);
+                document.getElementById('inscrisi').textContent = stats.inscrisi ?? 0;
+                document.getElementById('auParticipat').textContent = stats.auParticipat ?? 0;
 
                 // Încarcă participanții salvați
                 loadSavedParticipants();
@@ -1274,9 +1298,41 @@
                 const gradIndex = headers.findIndex(h => h.includes('Grad Aikikai'));
                 const participareIndex = headers.findIndex(h => h.includes('Participare'));
 
+                // Înscriși = număr rânduri cu Nume complet (coloana B) din sheet 87508598
+                const inscrisi = rows.length;
+
+                // Descarcă sheet-ul de participare (gid 1681679287) pentru „Au participat” = unici în coloana A (Nume participant)
+                let auParticipat = 0;
+                const SHEET_PARTICIPARE_GID = '1681679287';
+                try {
+                    const partUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&gid=${SHEET_PARTICIPARE_GID}&_=${timestamp}`;
+                    const partRes = await fetch(partUrl, { mode: 'cors', credentials: 'omit' });
+                    if (partRes.ok) {
+                        const partCsv = await partRes.text();
+                        if (partCsv && partCsv.length > 20) {
+                            const partLines = partCsv.trim().split('\n');
+                            const partHeaders = parseCSVLine(partLines[0]);
+                            const numeParticipantCol = partHeaders.findIndex(h => (h || '').toLowerCase().includes('nume') && (h || '').toLowerCase().includes('participant'));
+                            const colA = numeParticipantCol >= 0 ? numeParticipantCol : 0;
+                            const uniqueNames = new Set();
+                            partLines.slice(1).forEach(line => {
+                                const cells = parseCSVLine(line);
+                                const nume = (cells[colA] || '').trim();
+                                if (nume) uniqueNames.add(nume);
+                            });
+                            auParticipat = uniqueNames.size;
+                            console.log('✅ Au participat (unici):', auParticipat);
+                        }
+                    }
+                } catch (e) {
+                    console.warn('⚠️ Nu s-au putut încărca datele de participare:', e);
+                }
+
                 // Calculează statistici
                 const stats = {
-                    total: rows.length,
+                    total: inscrisi,
+                    inscrisi,
+                    auParticipat,
                     copilAdult: {},
                     grade: {},
                     dojos: {},
@@ -1284,7 +1340,7 @@
                     participare: {}
                 };
 
-                console.log(`✅ Descărcat: ${rows.length} participanți`);
+                console.log(`✅ Descărcat: ${rows.length} înscriși`);
 
                 // Resetează array-ul de participanți
                 allParticipants = [];
@@ -1323,6 +1379,10 @@
                 // Populează tabelul de participanți
                 populateParticipantsTable(allParticipants);
                 console.log(`📋 Tabel populat cu ${allParticipants.length} participanți`);
+
+                // Actualizează cardul Înscriși / Au participat
+                document.getElementById('inscrisi').textContent = stats.inscrisi;
+                document.getElementById('auParticipat').textContent = stats.auParticipat;
 
                 // Actualizează cardurile cu animație
                 animateValue('totalParticipanti', 0, stats.total, 800);
