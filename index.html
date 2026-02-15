@@ -638,6 +638,20 @@
                 </div>
             </div>
         </div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="antrenament1">0</div>
+                <div class="stat-label">Participanți antrenament 1</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="antrenament2">0</div>
+                <div class="stat-label">Participanți antrenament 2</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="antrenament3">0</div>
+                <div class="stat-label">Participanți antrenament 3</div>
+            </div>
+        </div>
         <div class="stats-grid single-card">
             <div class="stat-card total-card">
                 <div class="stat-number" id="totalParticipanti">37</div>
@@ -771,7 +785,10 @@
             organizatii: { 'Asociatia Dumkan': 20, 'FRAA': 17 },
             participare: { 'Toate antrenamentele': 30, 'Sesiuni specifice': 7 },
             inscrisi: 0,
-            auParticipat: 0
+            auParticipat: 0,
+            antrenament1: 0,
+            antrenament2: 0,
+            antrenament3: 0
         };
 
         // Încearcă să încarci date din localStorage
@@ -782,6 +799,9 @@
                     const data = JSON.parse(saved);
                     if (data.inscrisi === undefined) data.inscrisi = 0;
                     if (data.auParticipat === undefined) data.auParticipat = 0;
+                    if (data.antrenament1 === undefined) data.antrenament1 = 0;
+                    if (data.antrenament2 === undefined) data.antrenament2 = 0;
+                    if (data.antrenament3 === undefined) data.antrenament3 = 0;
                     return data;
                 } catch (e) {
                     console.error('Eroare la parsarea datelor salvate:', e);
@@ -1142,6 +1162,9 @@
             document.getElementById('totalMudansha').textContent = stats.grade['Mudansha (grad Kyu)'] || 0;
             document.getElementById('inscrisi').textContent = stats.inscrisi ?? 0;
             document.getElementById('auParticipat').textContent = stats.auParticipat ?? 0;
+            document.getElementById('antrenament1').textContent = stats.antrenament1 ?? 0;
+            document.getElementById('antrenament2').textContent = stats.antrenament2 ?? 0;
+            document.getElementById('antrenament3').textContent = stats.antrenament3 ?? 0;
         }
 
         // Actualizează afișajul ultimei sincronizări
@@ -1186,6 +1209,9 @@
                 animateValue('totalMudansha', 0, stats.grade['Mudansha (grad Kyu)'] || 0, 1000);
                 document.getElementById('inscrisi').textContent = stats.inscrisi ?? 0;
                 document.getElementById('auParticipat').textContent = stats.auParticipat ?? 0;
+                document.getElementById('antrenament1').textContent = stats.antrenament1 ?? 0;
+                document.getElementById('antrenament2').textContent = stats.antrenament2 ?? 0;
+                document.getElementById('antrenament3').textContent = stats.antrenament3 ?? 0;
 
                 // Încarcă participanții salvați
                 loadSavedParticipants();
@@ -1302,11 +1328,13 @@
                 // Înscriși = număr rânduri cu Nume complet (coloana B) din sheet 87508598
                 const inscrisi = rows.length;
 
-                // Au participat = unici din coloana A (fără header) din 3 sheet-uri: 138549664, 1187751851, 423881536
+                // Au participat = unici din coloana A (fără header) din 3 sheet-uri; per-sheet = Participanți antrenament 1/2/3
                 let auParticipat = 0;
                 const SHEET_PARTICIPARE_GIDS = ['138549664', '1187751851', '423881536'];
                 const uniqueNames = new Set();
-                for (const gid of SHEET_PARTICIPARE_GIDS) {
+                const perSheetCounts = [0, 0, 0];
+                for (let i = 0; i < SHEET_PARTICIPARE_GIDS.length; i++) {
+                    const gid = SHEET_PARTICIPARE_GIDS[i];
                     try {
                         const partUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&gid=${gid}&_=${timestamp}`;
                         const partRes = await fetch(partUrl, { mode: 'cors', credentials: 'omit' });
@@ -1314,11 +1342,16 @@
                             const partCsv = await partRes.text();
                             if (partCsv && partCsv.length > 5) {
                                 const partLines = partCsv.trim().split('\n');
+                                let count = 0;
                                 partLines.slice(1).forEach(line => {
                                     const cells = parseCSVLine(line);
                                     const nume = (cells[0] || '').trim();
-                                    if (nume) uniqueNames.add(nume);
+                                    if (nume) {
+                                        uniqueNames.add(nume);
+                                        count++;
+                                    }
                                 });
+                                perSheetCounts[i] = count;
                             }
                         }
                     } catch (e) {
@@ -1326,13 +1359,16 @@
                     }
                 }
                 auParticipat = uniqueNames.size;
-                console.log('✅ Au participat (unici din 3 sheet-uri):', auParticipat);
+                console.log('✅ Au participat (unici):', auParticipat, '| Antrenament 1/2/3:', perSheetCounts);
 
                 // Calculează statistici
                 const stats = {
                     total: inscrisi,
                     inscrisi,
                     auParticipat,
+                    antrenament1: perSheetCounts[0],
+                    antrenament2: perSheetCounts[1],
+                    antrenament3: perSheetCounts[2],
                     copilAdult: {},
                     grade: {},
                     dojos: {},
@@ -1380,9 +1416,12 @@
                 populateParticipantsTable(allParticipants);
                 console.log(`📋 Tabel populat cu ${allParticipants.length} participanți`);
 
-                // Actualizează cardul Înscriși / Au participat
+                // Actualizează cardurile Înscriși / Participanți și antrenament 1/2/3
                 document.getElementById('inscrisi').textContent = stats.inscrisi;
                 document.getElementById('auParticipat').textContent = stats.auParticipat;
+                document.getElementById('antrenament1').textContent = stats.antrenament1;
+                document.getElementById('antrenament2').textContent = stats.antrenament2;
+                document.getElementById('antrenament3').textContent = stats.antrenament3;
 
                 // Actualizează cardurile cu animație
                 animateValue('totalParticipanti', 0, stats.total, 800);
