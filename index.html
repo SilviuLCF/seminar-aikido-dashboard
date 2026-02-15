@@ -1301,32 +1301,31 @@
                 // Înscriși = număr rânduri cu Nume complet (coloana B) din sheet 87508598
                 const inscrisi = rows.length;
 
-                // Descarcă sheet-ul de participare (gid 1681679287) pentru „Au participat” = unici în coloana A (Nume participant)
+                // Au participat = unici din coloana A (fără header) din 3 sheet-uri: 138549664, 1187751851, 423881536
                 let auParticipat = 0;
-                const SHEET_PARTICIPARE_GID = '1681679287';
-                try {
-                    const partUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&gid=${SHEET_PARTICIPARE_GID}&_=${timestamp}`;
-                    const partRes = await fetch(partUrl, { mode: 'cors', credentials: 'omit' });
-                    if (partRes.ok) {
-                        const partCsv = await partRes.text();
-                        if (partCsv && partCsv.length > 20) {
-                            const partLines = partCsv.trim().split('\n');
-                            const partHeaders = parseCSVLine(partLines[0]);
-                            const numeParticipantCol = partHeaders.findIndex(h => (h || '').toLowerCase().includes('nume') && (h || '').toLowerCase().includes('participant'));
-                            const colA = numeParticipantCol >= 0 ? numeParticipantCol : 0;
-                            const uniqueNames = new Set();
-                            partLines.slice(1).forEach(line => {
-                                const cells = parseCSVLine(line);
-                                const nume = (cells[colA] || '').trim();
-                                if (nume) uniqueNames.add(nume);
-                            });
-                            auParticipat = uniqueNames.size;
-                            console.log('✅ Au participat (unici):', auParticipat);
+                const SHEET_PARTICIPARE_GIDS = ['138549664', '1187751851', '423881536'];
+                const uniqueNames = new Set();
+                for (const gid of SHEET_PARTICIPARE_GIDS) {
+                    try {
+                        const partUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&gid=${gid}&_=${timestamp}`;
+                        const partRes = await fetch(partUrl, { mode: 'cors', credentials: 'omit' });
+                        if (partRes.ok) {
+                            const partCsv = await partRes.text();
+                            if (partCsv && partCsv.length > 5) {
+                                const partLines = partCsv.trim().split('\n');
+                                partLines.slice(1).forEach(line => {
+                                    const cells = parseCSVLine(line);
+                                    const nume = (cells[0] || '').trim();
+                                    if (nume) uniqueNames.add(nume);
+                                });
+                            }
                         }
+                    } catch (e) {
+                        console.warn('⚠️ Sheet', gid, ':', e.message);
                     }
-                } catch (e) {
-                    console.warn('⚠️ Nu s-au putut încărca datele de participare:', e);
                 }
+                auParticipat = uniqueNames.size;
+                console.log('✅ Au participat (unici din 3 sheet-uri):', auParticipat);
 
                 // Calculează statistici
                 const stats = {
