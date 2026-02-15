@@ -1371,10 +1371,17 @@
                         document.getElementById('alteOrganizatiiCount').textContent = stats.alteOrganizatii ?? (listParticipanti.length - fraa);
                         const copilL = listParticipanti.filter(p => (String(p.categorie || '').toUpperCase().includes('COPIL'))).length;
                         const adultL = listParticipanti.filter(p => (String(p.categorie || '').toUpperCase().includes('ADULT'))).length;
-                        const yudanshaL = listParticipanti.filter(p => /dan|yudansha/i.test(String(p.grad || ''))).length;
+                        const yudanshaL = listParticipanti.filter(p => {
+                            const g = String(p.grad || '').toUpperCase();
+                            return g.includes('YUDANSHA') || (g.includes('DAN') && !g.includes('MUDANSHA'));
+                        }).length;
+                        const mudanshaL = listParticipanti.filter(p => {
+                            const g = String(p.grad || '').toUpperCase();
+                            return g.includes('MUDANSHA') || g.includes('KYU');
+                        }).length;
                         document.getElementById('copilListaCount').textContent = stats.copilLista ?? copilL;
                         document.getElementById('adultListaCount').textContent = stats.adultLista ?? adultL;
-                        document.getElementById('mudanshaListaCount').textContent = stats.mudanshaLista ?? (listParticipanti.length - yudanshaL);
+                        document.getElementById('mudanshaListaCount').textContent = stats.mudanshaLista ?? mudanshaL;
                         document.getElementById('yudanshaListaCount').textContent = stats.yudanshaLista ?? yudanshaL;
                     } catch (e) { }
                 } else {
@@ -1575,8 +1582,14 @@
                 const alteOrganizatiiCount = listParticipanti.length - fraaCount;
                 const copilLista = listParticipanti.filter(p => (String(p.categorie || '').toUpperCase().includes('COPIL'))).length;
                 const adultLista = listParticipanti.filter(p => (String(p.categorie || '').toUpperCase().includes('ADULT'))).length;
-                const yudanshaLista = listParticipanti.filter(p => /dan|yudansha/i.test(String(p.grad || ''))).length;
-                const mudanshaLista = listParticipanti.length - yudanshaLista;
+                const yudanshaLista = listParticipanti.filter(p => {
+                    const g = String(p.grad || '').toUpperCase();
+                    return g.includes('YUDANSHA') || (g.includes('DAN') && !g.includes('MUDANSHA'));
+                }).length;
+                const mudanshaLista = listParticipanti.filter(p => {
+                    const g = String(p.grad || '').toUpperCase();
+                    return g.includes('MUDANSHA') || g.includes('KYU');
+                }).length;
 
                 // Calculează statistici
                 const stats = {
