@@ -1423,10 +1423,10 @@
                         const listPartCsv = await listPartRes.text();
                         if (listPartCsv && listPartCsv.length > 2) {
                             const listPartLines = listPartCsv.trim().split('\n');
-                            listPartLines.slice(1).forEach(line => {
+                            listPartLines.forEach(line => {
                                 const cells = parseCSVLine(line);
                                 const nume = (cells[0] || '').replace(/\r/g, '').trim();
-                                if (nume) uniqueNames.add(nume);
+                                if (nume && nume.toLowerCase() !== 'nume') uniqueNames.add(nume);
                             });
                         }
                     }
