@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Seminar Iulian Perpelici 6 Dan, București - Mirai Dojo</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -707,6 +708,29 @@
                 <div class="stat-label">Participanți antrenament 3</div>
             </div>
         </div>
+
+        <div class="charts-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); max-width: 1200px; margin: 20px auto;">
+            <div class="chart-card">
+                <h2 class="chart-title">Înscriși vs Participanți</h2>
+                <div class="chart-container"><canvas id="chartInscrisiParticipanti"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <h2 class="chart-title">FRAA vs Alte organizații</h2>
+                <div class="chart-container"><canvas id="chartFraaAlte"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <h2 class="chart-title">Copil vs Adult</h2>
+                <div class="chart-container"><canvas id="chartCopilAdult"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <h2 class="chart-title">Mudansha vs Yudansha</h2>
+                <div class="chart-container"><canvas id="chartMudanshaYudansha"></canvas></div>
+            </div>
+            <div class="chart-card full-width">
+                <h2 class="chart-title">Participanți pe antrenamente</h2>
+                <div class="chart-container"><canvas id="chartAntrenamente"></canvas></div>
+            </div>
+        </div>
         </div>
         <!-- End Dashboard Tab -->
 
@@ -788,6 +812,7 @@
         // Variabile globale pentru grafice și date
         let allParticipants = [];
         let listParticipanti = [];
+        let chartInscrisiParticipanti, chartFraaAlte, chartCopilAdult, chartMudanshaYudansha, chartAntrenamente;
 
         // Date default pentru grafice
         const defaultData = {
@@ -1004,6 +1029,88 @@
             document.getElementById('antrenament3').textContent = stats.antrenament3 ?? 0;
         }
 
+        const chartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { color: '#d1d5db', padding: 12 } },
+                tooltip: { backgroundColor: 'rgba(0,0,0,0.8)', titleColor: '#fff', bodyColor: '#d1d5db' }
+            }
+        };
+
+        function updateCharts(stats) {
+            const s = stats || loadSavedData();
+            // Înscriși vs Participanți
+            const inscrisi = s.inscrisi ?? 0, participanti = s.auParticipat ?? 0;
+            if (!chartInscrisiParticipanti) {
+                chartInscrisiParticipanti = new Chart(document.getElementById('chartInscrisiParticipanti'), {
+                    type: 'doughnut',
+                    data: { labels: ['Înscriși', 'Participanți'], datasets: [{ data: [inscrisi, participanti], backgroundColor: ['#0f9d58', '#16c172'], borderWidth: 0, hoverOffset: 12 }] },
+                    options: { ...chartOptions, cutout: '60%' }
+                });
+            } else {
+                chartInscrisiParticipanti.data.datasets[0].data = [inscrisi, participanti];
+                chartInscrisiParticipanti.update('active');
+            }
+            // FRAA vs Alte
+            const fraa = s.fraa ?? 0, alte = s.alteOrganizatii ?? 0;
+            if (!chartFraaAlte) {
+                chartFraaAlte = new Chart(document.getElementById('chartFraaAlte'), {
+                    type: 'doughnut',
+                    data: { labels: ['FRAA', 'Alte organizații'], datasets: [{ data: [fraa, alte], backgroundColor: ['#6366f1', '#8b5cf6'], borderWidth: 0, hoverOffset: 12 }] },
+                    options: { ...chartOptions, cutout: '60%' }
+                });
+            } else {
+                chartFraaAlte.data.datasets[0].data = [fraa, alte];
+                chartFraaAlte.update('active');
+            }
+            // Copil vs Adult
+            const copil = s.copilLista ?? 0, adult = s.adultLista ?? 0;
+            if (!chartCopilAdult) {
+                chartCopilAdult = new Chart(document.getElementById('chartCopilAdult'), {
+                    type: 'doughnut',
+                    data: { labels: ['Copil', 'Adult'], datasets: [{ data: [copil, adult], backgroundColor: ['#eab308', '#4b5563'], borderWidth: 0, hoverOffset: 12 }] },
+                    options: { ...chartOptions, cutout: '60%' }
+                });
+            } else {
+                chartCopilAdult.data.datasets[0].data = [copil, adult];
+                chartCopilAdult.update('active');
+            }
+            // Mudansha vs Yudansha
+            const mudansha = s.mudanshaLista ?? 0, yudansha = s.yudanshaLista ?? 0;
+            if (!chartMudanshaYudansha) {
+                chartMudanshaYudansha = new Chart(document.getElementById('chartMudanshaYudansha'), {
+                    type: 'doughnut',
+                    data: { labels: ['Mudansha', 'Yudansha'], datasets: [{ data: [mudansha, yudansha], backgroundColor: ['#ec4899', '#f472b6'], borderWidth: 0, hoverOffset: 12 }] },
+                    options: { ...chartOptions, cutout: '60%' }
+                });
+            } else {
+                chartMudanshaYudansha.data.datasets[0].data = [mudansha, yudansha];
+                chartMudanshaYudansha.update('active');
+            }
+            // Antrenament 1, 2, 3
+            const a1 = s.antrenament1 ?? 0, a2 = s.antrenament2 ?? 0, a3 = s.antrenament3 ?? 0;
+            if (!chartAntrenamente) {
+                chartAntrenamente = new Chart(document.getElementById('chartAntrenamente'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Antrenament 1', 'Antrenament 2', 'Antrenament 3'],
+                        datasets: [{ label: 'Participanți', data: [a1, a2, a3], backgroundColor: ['#dc2626', '#ea580c', '#ca8a04'], borderWidth: 0, borderRadius: 8 }]
+                    },
+                    options: {
+                        ...chartOptions,
+                        scales: {
+                            y: { beginAtZero: true, ticks: { color: '#d1d5db', stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.06)' } },
+                            x: { ticks: { color: '#d1d5db' }, grid: { display: false } }
+                        }
+                    }
+                });
+            } else {
+                chartAntrenamente.data.datasets[0].data = [a1, a2, a3];
+                chartAntrenamente.update('active');
+            }
+        }
+
         // Actualizează afișajul ultimei sincronizări
         function updateLastSyncDisplay() {
             const lastUpdate = localStorage.getItem('lastUpdate');
@@ -1073,6 +1180,7 @@
 
                 const date = new Date(lastUpdate);
                 console.log(`📊 Date încărcate din ultima sincronizare: ${date.toLocaleString('ro-RO')}`);
+                updateCharts(stats);
             }
             
             // Afișează data ultimei actualizări
@@ -1334,8 +1442,9 @@
                 document.getElementById('antrenament2').textContent = stats.antrenament2;
                 document.getElementById('antrenament3').textContent = stats.antrenament3;
 
-                // Salvează datele
+                // Salvează datele și actualizează graficele
                 saveData(stats);
+                updateCharts(stats);
                 
                 // Actualizează display-ul ultimei sincronizări
                 updateLastSyncDisplay();
